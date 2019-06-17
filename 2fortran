@@ -1,0 +1,2 @@
+#gfortran -O3 -o te te.f teprob.f
+gfortran -O3 -fbackslash -o te te.f teprob.f

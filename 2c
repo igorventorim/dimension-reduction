@@ -1,0 +1,3 @@
+f2c -O3 te.f
+f2c -O3 teprob.f
+gcc -O3 -o tec  te.c teprob.c -lf2c -lm

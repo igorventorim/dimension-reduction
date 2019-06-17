@@ -1,0 +1,8 @@
+172800		# Number of simulation steps
+0	# Random seed
+#
+# Timestamp	Fault			State
+# ===========================================
+72000		8			1
+144000		8			0
+#90000		3			1

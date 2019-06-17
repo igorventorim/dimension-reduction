@@ -1,0 +1,3 @@
+# Only working on Linux
+
+/usr/local/MATLAB/R2017a/bin/mex tesub.F

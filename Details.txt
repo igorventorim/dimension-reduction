@@ -1,0 +1,37 @@
+Simulador Tennessee Eastman
+==========================================
+1) Instalar, compilar
+2) Editar arquivo de configuração (pasta 'cfg')
+3) rodar: te ../cfg/config1.csv , experimentando várias falhas diferentes = modificar arquivo de configuração
+4) Inspecionar resultados: python TE.py
+
+Diagnóstico de Falhas
+=================
+Experimentar pelo menos dois classificadores diferentes
+1) Gaussiano Quadrático
+2) Vizinho-Mais-Próximo (em anexo)
+
+Determinar indicadores de desempenho (Acurária, F-measure, ....), usando validação cruzada 
+
+Data de entrega 17/04
+
+
+acurácia
+
+Para experimentar um classificador
+tem que ler a saída do simulador ('all.csv')
+com a função labelledcsvread
+
+====
+
+> Bom dia professor !!
+
+> quando eu compilo os arquivos do trabalho da um erro ( [Errno 2] No such file or directory: '/tmp/outfig.svg')
+
+> o programa ele gera esse arquivo ou preciso ter esse arquivo para compilar ??
+
+
+Esse arquivo é gerado e colocado na paste /tmp que é um padrão no Unix.
+
+Pode simplesmente comentar a linha, ou trocar o nome de '/tmp/outfig.svg' para './outfig.svg'
+para gravar na pasta atual de trabalho.

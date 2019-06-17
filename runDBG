@@ -1,0 +1,3 @@
+gdb --args te ../cfg/config_original_TE__d00_tr.csv
+
+# set watchpoint

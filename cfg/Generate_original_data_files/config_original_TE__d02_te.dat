@@ -1,0 +1,8 @@
+172800		# Number of simulation steps,  180 = 1 sample
+2891123453D0	# Random seed ==> c.f. teprob.f starting line 1200 (RANDOMSEED)
+#
+#
+# Timestamp	Fault			State
+# ===========================================
+28800		2			1
+# VERIFIED
