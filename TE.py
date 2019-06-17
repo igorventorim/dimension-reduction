@@ -1,4 +1,5 @@
 from __future__ import print_function
+from mpl_toolkits.mplot3d import Axes3D
 """
 ========================================
 VISUALIZE TENNESSEE EASTMAN VARIABLES
@@ -448,25 +449,48 @@ def main(argv):
     # te.plotscatter(csvdatafile, feat1, feat2, standardize=True) #; quit() 
     te = TE()
     X,Y,df = te.read_file_by_pandas(file)
-    te.signal_plot(infile=None, X=X, divide_by_mean=True, dropfigfile='/tmp/outfig.svg', title='Todas as variaveis'+' \n ')
+    #te.signal_plot(infile=None, X=X, divide_by_mean=True, dropfigfile='/tmp/outfig.svg', title='Todas as variaveis'+' \n ')
 
     #FULL
     rad_viz = pd.plotting.radviz(df,'Class')
-    plt.title('Radviz projection - all components of simulator TENNESSEE data')
+    #plt.title('Radviz projection - all components of simulator TENNESSEE data')
     plt.show()
 
     #TSNE
     X_embedded_tsne = TSNE(n_components=2).fit_transform(X)
-    df_test = pd.DataFrame(np.append(X_embedded_tsne,Y,axis=1),columns=['A','B','Class']) 
-    rad_viz = pd.plotting.radviz(df_test,'Class')
-    plt.title('TSNE projection - 2 components of simulator TENNESSEE data')
+    #df_test = pd.DataFrame(np.append(X_embedded_tsne,Y,axis=1),columns=['A','B','Class']) 
+    #rad_viz = pd.plotting.radviz(df_test,'Class')
+    t = range(0, 239940, 180)
+    #ipdb.set_trace()
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(X_embedded_tsne[0:333, 0], X_embedded_tsne[0:333, 1], t[0:333], marker='^', label="class 1")
+    ax.scatter(X_embedded_tsne[333:666, 0], X_embedded_tsne[333:666, 1], t[333:666], marker='o', label="class 2")
+    ax.scatter(X_embedded_tsne[666:999, 0], X_embedded_tsne[666:999, 1], t[666:999], marker='x', label="class 4")
+    ax.scatter(X_embedded_tsne[999:, 0], X_embedded_tsne[999:, 1], t[999:], marker='s', label="class 6")
+    plt.legend()
+    #ax.title('TSNE projection - 2 components of simulator TENNESSEE data')
     plt.show()
 
     #PCA
     X_embedded_pca = PCA(n_components=2).fit_transform(X)
-    df_test = pd.DataFrame(np.append(X_embedded_pca,Y,axis=1),columns=['A','B','Class'])
-    rad_viz = pd.plotting.radviz(df_test,'Class')
-    plt.title('PCA projection - 2 components of simulator TENNESSEE data')
+    #df_test = pd.DataFrame(np.append(X_embedded_pca,Y,axis=1),columns=['A','B','Class'])
+    #rad_viz = pd.plotting.radviz(df_test,'Class')
+    #plt.title('PCA projection - 2 components of simulator TENNESSEE data')
+    #plt.show()
+
+    t = range(0, 38520, 180)
+    #ipdb.set_trace()
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(X_embedded_tsne[0:44, 0], X_embedded_pca[0:44, 1], t[0:44], marker='^', label="class 1")
+    ax.scatter(X_embedded_tsne[44:88, 0], X_embedded_pca[44:88, 1], t[44:88], marker='o', label="class 2")
+    ax.scatter(X_embedded_tsne[88:133, 0], X_embedded_pca[88:133, 1], t[88:133], marker='x', label="class 4")
+    ax.scatter(X_embedded_tsne[133:, 0], X_embedded_pca[133:, 1], t[133:], marker='s', label="class 6")
+    plt.legend()
+    #ax.title('TSNE projection - 2 components of simulator TENNESSEE data')
     plt.show()
 
     # Run the Sammon projection
@@ -479,7 +503,7 @@ def main(argv):
     # plt.legend(loc=2)
     # plt.show()
 
-    ipdb.set_trace()
+    #ipdb.set_trace()
 
 
 if __name__ == "__main__":
