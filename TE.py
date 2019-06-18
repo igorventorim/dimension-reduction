@@ -14,6 +14,7 @@ import pandas as pd
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from sklearn.decomposition import IncrementalPCA
+import matplotlib.cm as cm
 from sammon import sammon
 import ipdb
 
@@ -393,6 +394,25 @@ class TE():
         Y = np.array(df.values[:,df.values.shape[1]-1:df.values.shape[1]])
         return X,Y,df
 
+    def plot3d(self,X,Y):
+        time = np.array(range(0,X.shape[0]*180,180)).reshape(len(range(0,X.shape[0]*180,180)),1)
+        matrix = np.append(X,Y,axis=1)
+        matrix = np.append(matrix,time,axis=1)
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        classes = np.unique(Y)
+        colors = cm.rainbow(np.linspace(0, 1, len(classes)))
+        
+        for clas,c in zip(classes,colors):
+            elementFromClass = matrix[matrix[:,X.shape[1]] == clas]
+            ax.scatter(elementFromClass[:, 0], elementFromClass[:, 1], elementFromClass[:,3], color=c, label=clas)
+            # print(clas)
+        
+        plt.legend()
+        #ax.title('TSNE projection - 2 components of simulator TENNESSEE data')
+        plt.show()
+        
 
 def test1():
     import csv
@@ -449,6 +469,7 @@ def main(argv):
     # te.plotscatter(csvdatafile, feat1, feat2, standardize=True) #; quit() 
     te = TE()
     X,Y,df = te.read_file_by_pandas(file)
+    # ipdb.set_trace()
     #te.signal_plot(infile=None, X=X, divide_by_mean=True, dropfigfile='/tmp/outfig.svg', title='Todas as variaveis'+' \n ')
 
     #FULL
@@ -463,6 +484,8 @@ def main(argv):
     t = range(0, 239940, 180)
     #ipdb.set_trace()
 
+    te.plot3d(X_embedded_tsne,Y)
+
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.scatter(X_embedded_tsne[0:333, 0], X_embedded_tsne[0:333, 1], t[0:333], marker='^', label="class 1")
@@ -474,24 +497,24 @@ def main(argv):
     plt.show()
 
     #PCA
-    X_embedded_pca = PCA(n_components=2).fit_transform(X)
+    # X_embedded_pca = PCA(n_components=2).fit_transform(X)
     #df_test = pd.DataFrame(np.append(X_embedded_pca,Y,axis=1),columns=['A','B','Class'])
     #rad_viz = pd.plotting.radviz(df_test,'Class')
     #plt.title('PCA projection - 2 components of simulator TENNESSEE data')
     #plt.show()
 
-    t = range(0, 38520, 180)
+    # t = range(0, 38520, 180)
     #ipdb.set_trace()
     
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(X_embedded_tsne[0:44, 0], X_embedded_pca[0:44, 1], t[0:44], marker='^', label="class 1")
-    ax.scatter(X_embedded_tsne[44:88, 0], X_embedded_pca[44:88, 1], t[44:88], marker='o', label="class 2")
-    ax.scatter(X_embedded_tsne[88:133, 0], X_embedded_pca[88:133, 1], t[88:133], marker='x', label="class 4")
-    ax.scatter(X_embedded_tsne[133:, 0], X_embedded_pca[133:, 1], t[133:], marker='s', label="class 6")
-    plt.legend()
+    # fig = plt.figure()
+    # ax = fig.add_subplot(111, projection='3d')
+    # ax.scatter(X_embedded_tsne[0:44, 0], X_embedded_pca[0:44, 1], t[0:44], marker='^', label="class 1")
+    # ax.scatter(X_embedded_tsne[44:88, 0], X_embedded_pca[44:88, 1], t[44:88], marker='o', label="class 2")
+    # ax.scatter(X_embedded_tsne[88:133, 0], X_embedded_pca[88:133, 1], t[88:133], marker='x', label="class 4")
+    # ax.scatter(X_embedded_tsne[133:, 0], X_embedded_pca[133:, 1], t[133:], marker='s', label="class 6")
+    # plt.legend()
     #ax.title('TSNE projection - 2 components of simulator TENNESSEE data')
-    plt.show()
+    # plt.show()
 
     # Run the Sammon projection
     # [ySammon,E] = sammon(X)
