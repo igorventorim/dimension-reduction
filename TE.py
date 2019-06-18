@@ -17,6 +17,7 @@ from sklearn.decomposition import IncrementalPCA
 import matplotlib.cm as cm
 from sammon import sammon
 import ipdb
+from sklearn.preprocessing import LabelEncoder
 
 
 class TE():
@@ -226,8 +227,8 @@ class TE():
             for i in range(numclasses):
                 idx = np.where(y == i)
                 numpts = len(idx[0])
-                t = np.linspace(toffset, toffset+numpts-1, numpts)
-                toffset += numpts
+                t = np.linspace(0, toffset+numpts-1, numpts)
+                #toffset += numpts
                 ax.scatter(X[idx, 0], X[idx, 1], t, c=colors[i], label=classname[i])
             #ax.set_zlim(bottom=0, top=toffset+numpts)
         else:
@@ -264,7 +265,6 @@ class TE():
         if standardize:
             mean = X.mean(axis=0)
             std = X.std(axis=0)
-            #print('mean=', mean, 'std=', std)
             X = (X - mean) / std
         #featname = [self.featname[feat1], self.featname[feat2]]
         featname = [self.extendedfeatname[feat1], self.extendedfeatname[feat2]]
@@ -392,12 +392,23 @@ class TE():
         df = pd.read_csv(file, sep='\t',names=self.extendedfeatname+['Class'])
         X = np.array(df.values[:,0:df.values.shape[1]-1])
         Y = np.array(df.values[:,df.values.shape[1]-1:df.values.shape[1]])
-        return X,Y,df
+
+        le = LabelEncoder()
+        ynum = le.fit_transform(Y)
+        
+        return X,Y,ynum,df
 
     def plot3d(self,X,Y):
-        time = np.array(range(0,X.shape[0]*180,180)).reshape(len(range(0,X.shape[0]*180,180)),1)
+        #time = np.array(range(0,X.shape[0]*180,180)).reshape(len(range(0,X.shape[0],180)),1)
+        #ipdb.set_trace()
+        #for j in range(X.shape[1]):
+        #    X[:, j] = (X[:, j] / np.mean(X[:, j])) + j
+            #ts = ts + j
+            #print('Feat#', j+1, '=', ts)
+            #plt.plot(ts, linewidth=0.5)
+        
         matrix = np.append(X,Y,axis=1)
-        matrix = np.append(matrix,time,axis=1)
+        #matrix = np.append(matrix,time,axis=1)
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
 
@@ -406,12 +417,12 @@ class TE():
         
         for clas,c in zip(classes,colors):
             elementFromClass = matrix[matrix[:,X.shape[1]] == clas]
-            ax.scatter(elementFromClass[:, 0], elementFromClass[:, 1], elementFromClass[:,3], color=c, label=clas)
+            ax.scatter(elementFromClass[:, 0], elementFromClass[:, 1], list(range(0, elementFromClass.shape[0])), color=c, label=clas)
             # print(clas)
         
         plt.legend()
         #ax.title('TSNE projection - 2 components of simulator TENNESSEE data')
-        plt.show()
+        #plt.show()
         
 
 def test1():
@@ -468,14 +479,15 @@ def main(argv):
     # csvdatafile = 'out/all.csv'
     # te.plotscatter(csvdatafile, feat1, feat2, standardize=True) #; quit() 
     te = TE()
-    X,Y,df = te.read_file_by_pandas(file)
+    X,Y,ynum,df = te.read_file_by_pandas(file)
+    
     # ipdb.set_trace()
     #te.signal_plot(infile=None, X=X, divide_by_mean=True, dropfigfile='/tmp/outfig.svg', title='Todas as variaveis'+' \n ')
 
     #FULL
     rad_viz = pd.plotting.radviz(df,'Class')
     #plt.title('Radviz projection - all components of simulator TENNESSEE data')
-    plt.show()
+    #plt.show()
 
     #TSNE
     X_embedded_tsne = TSNE(n_components=2).fit_transform(X)
@@ -488,13 +500,14 @@ def main(argv):
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(X_embedded_tsne[0:333, 0], X_embedded_tsne[0:333, 1], t[0:333], marker='^', label="class 1")
-    ax.scatter(X_embedded_tsne[333:666, 0], X_embedded_tsne[333:666, 1], t[333:666], marker='o', label="class 2")
-    ax.scatter(X_embedded_tsne[666:999, 0], X_embedded_tsne[666:999, 1], t[666:999], marker='x', label="class 4")
-    ax.scatter(X_embedded_tsne[999:, 0], X_embedded_tsne[999:, 1], t[999:], marker='s', label="class 6")
+    
+    ax.scatter(X_embedded_tsne[0:333, 0], X_embedded_tsne[0:333, 1], list(range(0, 333, 1))  , marker='^', label="class 1")
+    ax.scatter(X_embedded_tsne[333:666, 0], X_embedded_tsne[333:666, 1], list(range(0, 333, 1)), marker='o', label="class 2")
+    ax.scatter(X_embedded_tsne[666:999, 0], X_embedded_tsne[666:999, 1], list(range(0, 333, 1)), marker='x', label="class 4")
+    ax.scatter(X_embedded_tsne[999:, 0], X_embedded_tsne[999:, 1], list(range(0, 334, 1)), marker='s', label="class 6")
     plt.legend()
     #ax.title('TSNE projection - 2 components of simulator TENNESSEE data')
-    plt.show()
+    #plt.show()    
 
     #PCA
     # X_embedded_pca = PCA(n_components=2).fit_transform(X)
@@ -527,6 +540,10 @@ def main(argv):
     # plt.show()
 
     #ipdb.set_trace()
+
+    te.plot_condition(X_embedded_tsne, ynum, np.unique(ynum), np.unique(Y), ['tsne1','tsne2'], plot_time_axis=True, dropfigfile=None, title='Trabalho finalizado')
+    
+    
 
 
 if __name__ == "__main__":
