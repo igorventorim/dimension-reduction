@@ -88,8 +88,8 @@ class TE():
         'Stripper liquid product flow (stream 11)'	,	#	8
         'Stripper steam valve'	,                           	#	9
         'Reactor cooling water flow'	,                 	#	10
-        'Condenser cooling water flow'	,                 	#	11
-        'Agitator speed']             # constant 50%			12
+        'Condenser cooling water flow']	#,                 	#	11
+        #'Agitator speed']             # constant 50%			12
 
     def var_category_str(self, featnr):
         '''Returning string with the original category 'XMEAS #' or 'XMV #'
@@ -388,15 +388,42 @@ class TE():
             plt.savefig(dropfigfile, dpi=1200)
         plt.show()
 
-    def read_file_by_pandas(self,file):
-        df = pd.read_csv(file, sep='\t',names=self.extendedfeatname+['Class'])
-        X = np.array(df.values[:,0:df.values.shape[1]-1])
-        Y = np.array(df.values[:,df.values.shape[1]-1:df.values.shape[1]])
-
-        le = LabelEncoder()
-        ynum = le.fit_transform(Y)
+    def read_file_by_pandas(self, basefile, num_failure):
         
-        return X,Y,ynum,df
+        file = basefile + ("%02d" % (num_failure,)) + '_te.dat'       
+
+        df = pd.read_csv(file, sep='   ', names=self.extendedfeatname)
+        ipdb.set_trace()
+        X = df.values
+        ynum = np.repeat(num_failure, X.shape[0])
+        #Y = np.array(df.values[:,df.values.shape[1]:df.values.shape[1]])
+
+        #le = LabelEncoder()
+        #ynum = le.fit_transform(Y)
+        
+        return X, ynum, ynum, df
+
+    def read_all_files(self, basefile, failure_list):
+
+        X_all = []
+        Y_all = []
+        ynum_all = []        
+        for i in failure_list:
+            X, Y, ynum, df = self.read_file_by_pandas(basefile, i)
+            X_all.append(X)
+            Y_all.append(Y)
+            ynum_all.append(ynum)
+            if X_all.size == 0:
+                X_all = X
+                Y_all = Y
+                ynum_all = ynum            
+            else:
+                X_all = np.concatenate((X_all, X), axis=0)
+                Y_all = np.concatenate((Y_all, Y), axis=0)
+                ynum_all = np.concatenate((ynum_all, ynum), axis=0)
+                
+
+        return X_all, Y_all, ynum_all    
 
     def plot3d(self,X,Y):
         #time = np.array(range(0,X.shape[0]*180,180)).reshape(len(range(0,X.shape[0],180)),1)
@@ -479,13 +506,15 @@ def main(argv):
     # csvdatafile = 'out/all.csv'
     # te.plotscatter(csvdatafile, feat1, feat2, standardize=True) #; quit() 
     te = TE()
-    X,Y,ynum,df = te.read_file_by_pandas(file)
+    #X,Y,ynum,df = te.read_file_by_pandas(file)
+    X,Y,ynum = te.read_all_files('data/d', [1,2,4,6])
+    ipdb.set_trace()
     
     # ipdb.set_trace()
     #te.signal_plot(infile=None, X=X, divide_by_mean=True, dropfigfile='/tmp/outfig.svg', title='Todas as variaveis'+' \n ')
 
     #FULL
-    rad_viz = pd.plotting.radviz(df,'Class')
+    #rad_viz = pd.plotting.radviz(df,'Class')
     #plt.title('Radviz projection - all components of simulator TENNESSEE data')
     #plt.show()
 
