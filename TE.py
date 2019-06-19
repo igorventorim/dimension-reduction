@@ -392,50 +392,33 @@ class TE():
         
         file = basefile + ("%02d" % (num_failure,)) + '_te.dat'       
 
-        df = pd.read_csv(file, sep='   ', names=self.extendedfeatname)
-        ipdb.set_trace()
-        X = df.values
-        ynum = np.repeat(num_failure, X.shape[0])
+        df = pd.read_csv(file, delim_whitespace=True, names=self.extendedfeatname)
+        # X = df.values
+        # ynum = np.repeat(num_failure, X.shape[0])
         #Y = np.array(df.values[:,df.values.shape[1]:df.values.shape[1]])
 
         #le = LabelEncoder()
         #ynum = le.fit_transform(Y)
-        
-        return X, ynum, ynum, df
+        return df
 
     def read_all_files(self, basefile, failure_list):
 
-        X_all = []
+        frames = []
         Y_all = []
         ynum_all = []        
         for i in failure_list:
-            X, Y, ynum, df = self.read_file_by_pandas(basefile, i)
-            X_all.append(X)
-            Y_all.append(Y)
-            ynum_all.append(ynum)
-            if X_all.size == 0:
-                X_all = X
-                Y_all = Y
-                ynum_all = ynum            
-            else:
-                X_all = np.concatenate((X_all, X), axis=0)
-                Y_all = np.concatenate((Y_all, Y), axis=0)
-                ynum_all = np.concatenate((ynum_all, ynum), axis=0)
-                
+            frame = self.read_file_by_pandas(basefile, i)
+            frames.append(frame)
+            Y_all = Y_all + [i]*len(frame)
+        df = pd.concat(frames, axis=0, ignore_index=True)
+        df['Agitator speed'] = [50]*len(df)
+        X_all = df.values
+        df['Class'] = Y_all
+        ipdb.set_trace()
+        return X_all, np.array(Y_all), np.array(Y_all), df    
 
-        return X_all, Y_all, ynum_all    
-
-    def plot3d(self,X,Y):
-        #time = np.array(range(0,X.shape[0]*180,180)).reshape(len(range(0,X.shape[0],180)),1)
-        #ipdb.set_trace()
-        #for j in range(X.shape[1]):
-        #    X[:, j] = (X[:, j] / np.mean(X[:, j])) + j
-            #ts = ts + j
-            #print('Feat#', j+1, '=', ts)
-            #plt.plot(ts, linewidth=0.5)
-        
-        matrix = np.append(X,Y,axis=1)
-        #matrix = np.append(matrix,time,axis=1)
+    def plot3d(self,X,Y, title="Example", features_name= ["Feature 1"," Feature 2"] ):
+        matrix = np.append(X,Y.reshape(-1,1),axis=1)
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
 
@@ -445,11 +428,16 @@ class TE():
         for clas,c in zip(classes,colors):
             elementFromClass = matrix[matrix[:,X.shape[1]] == clas]
             ax.scatter(elementFromClass[:, 0], elementFromClass[:, 1], list(range(0, elementFromClass.shape[0])), color=c, label=clas)
-            # print(clas)
         
         plt.legend()
-        #ax.title('TSNE projection - 2 components of simulator TENNESSEE data')
-        #plt.show()
+
+        ax.set_zlabel("Time")
+        ax.set_xlabel(features_name[0])
+        ax.set_ylabel(features_name[1])
+        plt.xlabel(features_name[0])
+        plt.ylabel(features_name[1])
+        plt.title(title)
+        plt.show()
         
 
 def test1():
@@ -468,10 +456,10 @@ def test1():
 def main(argv):
     print('Executing main() ....')
     
-    if len(argv) > 0:
-        file=argv[0]
-    else:
-        file="out/all.csv"
+    # if len(argv) > 0:
+    #     file=argv[0]
+    # else:
+    #     file="out/all.csv"
 
     #X, Y = test1()
     #return        
@@ -507,43 +495,45 @@ def main(argv):
     # te.plotscatter(csvdatafile, feat1, feat2, standardize=True) #; quit() 
     te = TE()
     #X,Y,ynum,df = te.read_file_by_pandas(file)
-    X,Y,ynum = te.read_all_files('data/d', [1,2,4,6])
-    ipdb.set_trace()
+    X,Y,ynum,df = te.read_all_files('data/d', [1,2,4,6])
+    # ipdb.set_trace()
     
     # ipdb.set_trace()
     #te.signal_plot(infile=None, X=X, divide_by_mean=True, dropfigfile='/tmp/outfig.svg', title='Todas as variaveis'+' \n ')
 
     #FULL
-    #rad_viz = pd.plotting.radviz(df,'Class')
-    #plt.title('Radviz projection - all components of simulator TENNESSEE data')
-    #plt.show()
+    # rad_viz = pd.plotting.radviz(df,'Class')
+    # plt.title('Radviz projection - all components of simulator TENNESSEE data')
+    # plt.show()
 
     #TSNE
     X_embedded_tsne = TSNE(n_components=2).fit_transform(X)
     #df_test = pd.DataFrame(np.append(X_embedded_tsne,Y,axis=1),columns=['A','B','Class']) 
     #rad_viz = pd.plotting.radviz(df_test,'Class')
-    t = range(0, 239940, 180)
+    # t = range(0, 239940, 180)
     #ipdb.set_trace()
 
-    te.plot3d(X_embedded_tsne,Y)
+    te.plot3d(X_embedded_tsne,Y,title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+    #fig = plt.figure()
+    #ax = fig.add_subplot(111, projection='3d')
     
-    ax.scatter(X_embedded_tsne[0:333, 0], X_embedded_tsne[0:333, 1], list(range(0, 333, 1))  , marker='^', label="class 1")
-    ax.scatter(X_embedded_tsne[333:666, 0], X_embedded_tsne[333:666, 1], list(range(0, 333, 1)), marker='o', label="class 2")
-    ax.scatter(X_embedded_tsne[666:999, 0], X_embedded_tsne[666:999, 1], list(range(0, 333, 1)), marker='x', label="class 4")
-    ax.scatter(X_embedded_tsne[999:, 0], X_embedded_tsne[999:, 1], list(range(0, 334, 1)), marker='s', label="class 6")
-    plt.legend()
+    #ax.scatter(X_embedded_tsne[0:333, 0], X_embedded_tsne[0:333, 1], list(range(0, 333, 1))  , marker='^', label="class 1")
+    #ax.scatter(X_embedded_tsne[333:666, 0], X_embedded_tsne[333:666, 1], list(range(0, 333, 1)), marker='o', label="class 2")
+    #ax.scatter(X_embedded_tsne[666:999, 0], X_embedded_tsne[666:999, 1], list(range(0, 333, 1)), marker='x', label="class 4")
+    #ax.scatter(X_embedded_tsne[999:, 0], X_embedded_tsne[999:, 1], list(range(0, 334, 1)), marker='s', label="class 6")
+    #plt.legend()
     #ax.title('TSNE projection - 2 components of simulator TENNESSEE data')
     #plt.show()    
 
     #PCA
-    # X_embedded_pca = PCA(n_components=2).fit_transform(X)
+    X_embedded_pca = PCA(n_components=2).fit_transform(X)
     #df_test = pd.DataFrame(np.append(X_embedded_pca,Y,axis=1),columns=['A','B','Class'])
     #rad_viz = pd.plotting.radviz(df_test,'Class')
     #plt.title('PCA projection - 2 components of simulator TENNESSEE data')
     #plt.show()
+    te.plot3d(X_embedded_pca,Y,title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"])
+
 
     # t = range(0, 38520, 180)
     #ipdb.set_trace()
@@ -570,7 +560,7 @@ def main(argv):
 
     #ipdb.set_trace()
 
-    te.plot_condition(X_embedded_tsne, ynum, np.unique(ynum), np.unique(Y), ['tsne1','tsne2'], plot_time_axis=True, dropfigfile=None, title='Trabalho finalizado')
+    # te.plot_condition(X_embedded_tsne, ynum, np.unique(ynum), np.unique(Y), ['tsne1','tsne2'], plot_time_axis=True, dropfigfile=None, title='Trabalho finalizado')
     
     
 
