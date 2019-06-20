@@ -411,10 +411,10 @@ class TE():
             frames.append(frame)
             Y_all = Y_all + [i]*len(frame)
         df = pd.concat(frames, axis=0, ignore_index=True)
-        df['Agitator speed'] = [50]*len(df)
+        # df['Agitator speed'] = [50.00]*len(df)
         X_all = df.values
         df['Class'] = Y_all
-        ipdb.set_trace()
+        # ipdb.set_trace()
         return X_all, np.array(Y_all), np.array(Y_all), df    
 
     def plot3d(self,X,Y, title="Example", features_name= ["Feature 1"," Feature 2"] ):
@@ -438,6 +438,31 @@ class TE():
         plt.ylabel(features_name[1])
         plt.title(title)
         plt.show()
+
+    def plot_radviz(self,df,features=list(range(1,53)),build_df=False):
+
+        if features != list(range(1,53)):
+            for i in range(0,52):
+                if i+1 > 53:
+                    print("Feature not found.")
+                    continue
+                if not i+1 in features:
+                    df = df.drop(labels=self.extendedfeatname[i],axis=1)
+        if build_df == True:
+            Y = df[['Class']]
+            df = df.drop(labels='Class', axis=1)
+            X = df.values
+            build = {}
+            for i,feature in enumerate(df.columns):
+                build[feature] = X.T[i]
+            build['Class'] = Y.values.reshape(-1,)
+            df = pd.DataFrame(build)
+        
+        pd.plotting.radviz(df,'Class')
+        plt.title('Radviz projection - all components of simulator TENNESSEE data')
+        plt.show()
+
+        
         
 
 def test1():
@@ -494,44 +519,22 @@ def main(argv):
     # csvdatafile = 'out/all.csv'
     # te.plotscatter(csvdatafile, feat1, feat2, standardize=True) #; quit() 
     te = TE()
-    #X,Y,ynum,df = te.read_file_by_pandas(file)
     X,Y,ynum,df = te.read_all_files('data/d', [1,2,4,6])
     # ipdb.set_trace()
-    
-    # ipdb.set_trace()
-    #te.signal_plot(infile=None, X=X, divide_by_mean=True, dropfigfile='/tmp/outfig.svg', title='Todas as variaveis'+' \n ')
 
-    #FULL
-    # rad_viz = pd.plotting.radviz(df,'Class')
-    # plt.title('Radviz projection - all components of simulator TENNESSEE data')
-    # plt.show()
+    #RADVIZ
+    te.plot_radviz(df,build_df=False)
+    te.plot_radviz(df,build_df=True)
+    te.plot_radviz(df,features=[1,2,4,6],build_df=False)
+
 
     #TSNE
     X_embedded_tsne = TSNE(n_components=2).fit_transform(X)
-    #df_test = pd.DataFrame(np.append(X_embedded_tsne,Y,axis=1),columns=['A','B','Class']) 
-    #rad_viz = pd.plotting.radviz(df_test,'Class')
-    # t = range(0, 239940, 180)
-    #ipdb.set_trace()
-
     te.plot3d(X_embedded_tsne,Y,title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
 
-    #fig = plt.figure()
-    #ax = fig.add_subplot(111, projection='3d')
-    
-    #ax.scatter(X_embedded_tsne[0:333, 0], X_embedded_tsne[0:333, 1], list(range(0, 333, 1))  , marker='^', label="class 1")
-    #ax.scatter(X_embedded_tsne[333:666, 0], X_embedded_tsne[333:666, 1], list(range(0, 333, 1)), marker='o', label="class 2")
-    #ax.scatter(X_embedded_tsne[666:999, 0], X_embedded_tsne[666:999, 1], list(range(0, 333, 1)), marker='x', label="class 4")
-    #ax.scatter(X_embedded_tsne[999:, 0], X_embedded_tsne[999:, 1], list(range(0, 334, 1)), marker='s', label="class 6")
-    #plt.legend()
-    #ax.title('TSNE projection - 2 components of simulator TENNESSEE data')
-    #plt.show()    
 
     #PCA
     X_embedded_pca = PCA(n_components=2).fit_transform(X)
-    #df_test = pd.DataFrame(np.append(X_embedded_pca,Y,axis=1),columns=['A','B','Class'])
-    #rad_viz = pd.plotting.radviz(df_test,'Class')
-    #plt.title('PCA projection - 2 components of simulator TENNESSEE data')
-    #plt.show()
     te.plot3d(X_embedded_pca,Y,title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"])
 
 
