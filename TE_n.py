@@ -8,6 +8,7 @@ import sklearn.preprocessing as skpp
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from sammon import sammon
+import datetime
 
 
 
@@ -144,12 +145,46 @@ class TE():
         #plt.xlabel(features_name[0])
         #plt.ylabel(features_name[1])
         plt.title(title)
-        plt.show()    
+        plt.show()
+
+    def plot3d_save_images(self, X, Y, title="Example", features_name= ["Feature 1"," Feature 2"] ):
+        X_aug = np.append(X, Y, axis=1)
+        fig = plt.figure()
+        
+        ax = fig.add_subplot(111, projection='3d')
+        classes = np.unique(Y)
+        colors = cm.gnuplot(np.linspace(0, 1, len(classes)))
+        
+        color_classes = {}
+        elements_class = {}
+        for clazz, c in zip(classes, colors):
+            elements_class[clazz] = X_aug[X_aug[:,-1] == clazz]
+            color_classes[clazz] = c
+
+        time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        os.mkdir('out_img/'+time)
+        for i in range(0,X.shape[0]):
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')    
+            for k,v in elements_class.items():
+                ax.scatter(v[i][0], v[i][1], i, color=color_classes[k],label=k)
+
+
+            ax.set_zlabel("Time")
+            ax.set_xlabel(features_name[0])
+            ax.set_ylabel(features_name[1])
+            ax.set_xlim(np.amin(X[:,0]*1.2),np.amax(X[:,0]*1.2))
+            ax.set_ylim(np.amin(X[:,1]*1.2),np.amax(X[:,1]*1.2))
+            ax.set_zlim([0,X.shape[0]/len(elements_class)])
+            plt.legend()
+            plt.title(title)
+            plt.savefig("out_img/"+time+"/"+str(i)+".png")
 
     def view_tsne(self, X, Y):
 
         X_ = TSNE(n_components=2).fit_transform(X)
         self.plot3d(X_, Y, title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
+        self.plot3d_save_images( X_, Y,title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
 
     def view_pca(self, X, Y):
         X_ = PCA(n_components=2).fit_transform(X)
@@ -190,10 +225,10 @@ if __name__ == "__main__":
     te = TE()
     X_train, Y_train, X_test, Y_test = te.read_concat_multiple_faults("data", [1, 2, 4], False)
     
-    #te.view_tsne(X_test, Y_test)
-    #te.view_pca(X_test, Y_test)
-    te.view_radviz(X_test, Y_test, [0, 20, 41, 31, 6])
-    #te.view_sammon(X_test, Y_test)
+    te.view_tsne(X_test, Y_test)
+    # te.view_pca(X_test, Y_test)
+    # te.view_radviz(X_test, Y_test, [0, 20, 41, 31, 6])
+    # te.view_sammon(X_test, Y_test)
     
     
     
