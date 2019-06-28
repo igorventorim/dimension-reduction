@@ -165,6 +165,10 @@ class TE():
             color_classes[clazz] = c
 
         time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        
+        if not os.path.isdir("out_img/"):
+            os.mkdir("out_img")
+            
         os.mkdir('out_img/'+time)
         for i in range(0,X.shape[0]):
             fig = plt.figure()
@@ -182,6 +186,7 @@ class TE():
             plt.legend()
             plt.title(title)
             plt.savefig("out_img/"+time+"/"+str(i)+".png")
+            plt.close(fig)
 
     def view_tsne(self, X, Y, save_img=False):
 
@@ -231,8 +236,8 @@ if __name__ == "__main__":
     te = TE()
     X_train, Y_train, X_test, Y_test = te.read_concat_multiple_faults("data", [1, 2, 4], False, [])
     
-    te.view_tsne(X_test, Y_test)
-    # te.view_pca(X_test, Y_test)
+    #te.view_tsne(X_test, Y_test)
+    te.view_pca(X_test, Y_test, True)
     # te.view_radviz(X_test, Y_test, [0, 20, 41, 31, 6])
     # te.view_sammon(X_test, Y_test)
     
