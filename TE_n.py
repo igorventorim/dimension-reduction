@@ -83,7 +83,7 @@ class TE():
         return name
 
 
-    def read_fault_train_test_file(self, datadir, fault_num, standardize):
+    def read_fault_train_test_file(self, datadir, fault_num, standardize, features=[]):
 
         fmt_fault_num = ("%02d" % (fault_num,))
         ext = ".dat"
@@ -103,16 +103,19 @@ class TE():
             X_train = df_train.values
             X_test = df_test.values
             
-        return X_train, X_test
+        if len(features) < 3:
+            return X_train, X_test
+        else:
+            return X_train[:,features],X_test[:,features]
 
-    def read_concat_multiple_faults(self, datadir, faults, standardize):
+    def read_concat_multiple_faults(self, datadir, faults, standardize, features=[]):
 
         X_train_all = []
         X_test_all = []
         Y_train_all = []
         Y_test_all = []
         for fault_num in faults:
-            X_train, X_test = self.read_fault_train_test_file(datadir, fault_num, standardize)
+            X_train, X_test = self.read_fault_train_test_file(datadir, fault_num, standardize, features)
             Y_train = np.repeat(fault_num, X_train.shape[0]).reshape(-1,1)
             Y_test = np.repeat(fault_num, X_test.shape[0]).reshape(-1,1)
 
@@ -162,6 +165,10 @@ class TE():
             color_classes[clazz] = c
 
         time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+        if not os.path.isdir("out_img/"):
+            os.mkdir("out_img")
+
         os.mkdir('out_img/'+time)
 
         
@@ -190,16 +197,21 @@ class TE():
             plt.legend()
             plt.title(title)
             plt.savefig("out_img/"+time+"/"+str(i)+".png")
+            plt.close(fig)
 
-    def view_tsne(self, X, Y):
+    def view_tsne(self, X, Y, save_img=False):
 
         X_ = TSNE(n_components=2).fit_transform(X)
         self.plot3d(X_, Y, title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
-        self.plot3d_save_images( X_, Y,title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
+        if save_img:
+            self.plot3d_save_images( X_, Y,title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
 
-    def view_pca(self, X, Y):
+
+    def view_pca(self, X, Y, save_img=False):
         X_ = PCA(n_components=2).fit_transform(X)
         te.plot3d(X_ ,Y, title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"])
+        if save_img:
+            self.plot3d_save_images( X_, Y,title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"])
 
     def view_radviz(self, X, Y, feats):
 
@@ -234,9 +246,9 @@ class TE():
 if __name__ == "__main__":
     
     te = TE()
-    X_train, Y_train, X_test, Y_test = te.read_concat_multiple_faults("data", [1, 2, 4], False)
+    X_train, Y_train, X_test, Y_test = te.read_concat_multiple_faults("data", [1, 2, 4], False, [])
     
-    te.view_tsne(X_test, Y_test)
+    te.view_tsne(X_test, Y_test, True)
     # te.view_pca(X_test, Y_test)
     # te.view_radviz(X_test, Y_test, [0, 20, 41, 31, 6])
     # te.view_sammon(X_test, Y_test)
