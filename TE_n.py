@@ -172,7 +172,7 @@ class TE():
         os.mkdir('out_img/'+time)
 
         
-        for i in range(0,int(X.shape[0]/len(classes))-1):
+        for i in range(0,int(X.shape[0]/len(classes))):
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')     
             for k,v in elements_class.items():
@@ -184,9 +184,8 @@ class TE():
             #         ax.scatter(v[i-1][0], v[i-1][1], i-1, color=color_classes[k],label=k)
 
             # PLOTA TODOS OS PONTOS ANTERIORES AO PONTO ATUAL
-            for j in range(0,i-1):
-                for k,v in elements_class.items():
-                    ax.scatter(v[j][0], v[j][1], j, color=color_classes[k])
+            for k,v in elements_class.items():
+                ax.scatter(v[:i,0], v[:i,1], range(0,i), color=color_classes[k])
 
             ax.set_zlabel("Time")
             ax.set_xlabel(features_name[0])
@@ -244,9 +243,10 @@ class TE():
         plt.show()
         
 if __name__ == "__main__":
-    
+
+    faults = [1,2,4]
     te = TE()
-    X_train, Y_train, X_test, Y_test = te.read_concat_multiple_faults("data", [1, 2, 4], False, [])
+    X_train, Y_train, X_test, Y_test = te.read_concat_multiple_faults("data", faults, False, [])
     
     te.view_tsne(X_test, Y_test, True)
     # te.view_pca(X_test, Y_test)
