@@ -83,7 +83,7 @@ class TE():
         return name
 
 
-    def read_fault_train_test_file(self, datadir, fault_num, standardize, features=[]):
+    def read_fault_train_test_file(self, datadir, fault_num, standardize):
 
         fmt_fault_num = ("%02d" % (fault_num,))
         ext = ".dat"
@@ -103,19 +103,16 @@ class TE():
             X_train = df_train.values
             X_test = df_test.values
             
-        if len(features) < 3:
-            return X_train, X_test
-        else:
-            return X_train[:,features],X_test[:,features]
+        return X_train, X_test
 
-    def read_concat_multiple_faults(self, datadir, faults, standardize, features=[]):
+    def read_concat_multiple_faults(self, datadir, faults, standardize):
 
         X_train_all = []
         X_test_all = []
         Y_train_all = []
         Y_test_all = []
         for fault_num in faults:
-            X_train, X_test = self.read_fault_train_test_file(datadir, fault_num, standardize, features)
+            X_train, X_test = self.read_fault_train_test_file(datadir, fault_num, standardize)
             Y_train = np.repeat(fault_num, X_train.shape[0]).reshape(-1,1)
             Y_test = np.repeat(fault_num, X_test.shape[0]).reshape(-1,1)
 
@@ -165,17 +162,24 @@ class TE():
             color_classes[clazz] = c
 
         time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        
-        if not os.path.isdir("out_img/"):
-            os.mkdir("out_img")
-            
         os.mkdir('out_img/'+time)
-        for i in range(0,X.shape[0]):
+
+        
+        for i in range(0,int(X.shape[0]/len(classes))-1):
             fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')    
+            ax = fig.add_subplot(111, projection='3d')     
             for k,v in elements_class.items():
                 ax.scatter(v[i][0], v[i][1], i, color=color_classes[k],label=k)
+            
+            # PLOTA O PONTO ANTERIOR
+            # if i > 0:
+            #     for k,v in elements_class.items():
+            #         ax.scatter(v[i-1][0], v[i-1][1], i-1, color=color_classes[k],label=k)
 
+            # PLOTA TODOS OS PONTOS ANTERIORES AO PONTO ATUAL
+            for j in range(0,i-1):
+                for k,v in elements_class.items():
+                    ax.scatter(v[j][0], v[j][1], j, color=color_classes[k])
 
             ax.set_zlabel("Time")
             ax.set_xlabel(features_name[0])
@@ -186,20 +190,16 @@ class TE():
             plt.legend()
             plt.title(title)
             plt.savefig("out_img/"+time+"/"+str(i)+".png")
-            plt.close(fig)
 
-    def view_tsne(self, X, Y, save_img=False):
+    def view_tsne(self, X, Y):
 
         X_ = TSNE(n_components=2).fit_transform(X)
         self.plot3d(X_, Y, title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
-        if save_img:
-            self.plot3d_save_images( X_, Y,title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
+        self.plot3d_save_images( X_, Y,title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
 
-    def view_pca(self, X, Y, save_img=False):
+    def view_pca(self, X, Y):
         X_ = PCA(n_components=2).fit_transform(X)
         te.plot3d(X_ ,Y, title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"])
-        if save_img:
-            self.plot3d_save_images( X_, Y,title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"])
 
     def view_radviz(self, X, Y, feats):
 
@@ -234,10 +234,10 @@ class TE():
 if __name__ == "__main__":
     
     te = TE()
-    X_train, Y_train, X_test, Y_test = te.read_concat_multiple_faults("data", [1, 2, 4], False, [])
+    X_train, Y_train, X_test, Y_test = te.read_concat_multiple_faults("data", [1, 2, 4], False)
     
-    #te.view_tsne(X_test, Y_test)
-    te.view_pca(X_test, Y_test, True)
+    te.view_tsne(X_test, Y_test)
+    # te.view_pca(X_test, Y_test)
     # te.view_radviz(X_test, Y_test, [0, 20, 41, 31, 6])
     # te.view_sammon(X_test, Y_test)
     
