@@ -47,15 +47,17 @@ classifiers = [
 # X += 2 * rng.uniform(size=X.shape)
 # linearly_separable = (X, y)
 
-datasets = [make_moons(noise=0.3, random_state=0),
-            make_circles(noise=0.2, factor=0.5, random_state=1)
-            ]
-
-faults = [2,4]
+faults = [1,2]
 te = TE()
 X_train, Y_train, X_test, Y_test = te.read_concat_multiple_faults("data", faults, False, [])
-datasets = [te.view_tsne(X_test, Y_test, use_time=False, save_img=False),te.view_pca(X_test, Y_test, use_time=False)]
-import ipdb; ipdb.set_trace()
+#ALL
+#datasets = [te.view_tsne(X_test[160:], Y_test[160:], use_time=False, save_img=False),te.view_pca(X_test[160:], Y_test[160:], use_time=False), te.view_sammon(X_test[160:], Y_test[160:])]
+#TSNE
+datasets = [te.view_tsne(X_test[160:], Y_test[160:], use_time=False, save_img=False)]
+#PCA
+#datasets = [te.view_pca(X_test[160:], Y_test[160:], use_time=False)]
+#SAMMON
+#datasets = [te.view_sammon(X_test[160:], Y_test[160:])]
 
 figure = plt.figure(figsize=(27, 9))
 i = 1

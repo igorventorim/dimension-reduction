@@ -252,6 +252,7 @@ class TE():
         plt.title('Sammon Plot')
         plt.legend(loc=2)
         plt.show()
+        return y,Y.T[0]
         
 if __name__ == "__main__":
 
@@ -262,7 +263,7 @@ if __name__ == "__main__":
     te.view_tsne(X_test, Y_test, use_time=False, save_img=False)
     #te.view_pca(X_test, Y_test, use_time=True)
     # te.view_radviz(X_test, Y_test, [0, 20, 41, 31, 6])
-    #te.view_sammon(X_test, Y_test)
+    # te.view_sammon(X_test, Y_test)
     
     
     
