@@ -127,24 +127,32 @@ class TE():
         return np.concatenate(X_train_all, axis=0), np.concatenate(Y_train_all, axis=0), np.concatenate(X_test_all, axis=0), np.concatenate(Y_test_all, axis=0)
     
 
-    def plot3d(self, X, Y, title="Example", features_name= ["Feature 1"," Feature 2"] ):
+    def plot(self, X, Y, title="Example", features_name= ["Feature 1"," Feature 2"], use_time=True ):
         
         X_aug = np.append(X, Y, axis=1)
         fig = plt.figure()
-        
-        ax = fig.add_subplot(111, projection='3d')
+
+        if use_time:
+            ax = fig.add_subplot(111, projection='3d')
+        else:
+            ax = fig.add_subplot(111)
         classes = np.unique(Y)
         colors = cm.gnuplot(np.linspace(0, 1, len(classes)))
         
         for clazz, c in zip(classes, colors):
             elementFromClass = X_aug[X_aug[:,-1] == clazz]
-            ax.scatter(elementFromClass[:, 0], elementFromClass[:, 1], list(range(0, elementFromClass.shape[0])), color=c, label=clazz)
-        
+            if use_time:
+                ax.scatter(elementFromClass[:, 0], elementFromClass[:, 1], list(range(0, elementFromClass.shape[0])), color=c, label=clazz)
+            else:    
+                ax.scatter(elementFromClass[:, 0], elementFromClass[:, 1], color=c, label=clazz)
+            
         plt.legend()
 
-        ax.set_zlabel("Time")
+        if use_time:
+            ax.set_zlabel("Time")
+            
         ax.set_xlabel(features_name[0])
-        ax.set_ylabel(features_name[1])
+        ax.set_ylabel(features_name[1])        
         #plt.xlabel(features_name[0])
         #plt.ylabel(features_name[1])
         plt.title(title)
@@ -198,17 +206,17 @@ class TE():
             plt.savefig("out_img/"+time+"/"+str(i)+".png")
             plt.close(fig)
 
-    def view_tsne(self, X, Y, save_img=False):
+    def view_tsne(self, X, Y, use_time=True, save_img=False):
 
         X_ = TSNE(n_components=2).fit_transform(X)
-        self.plot3d(X_, Y, title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
+        self.plot(X_, Y, title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"], use_time=use_time)
         if save_img:
             self.plot3d_save_images( X_, Y,title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
 
 
-    def view_pca(self, X, Y, save_img=False):
+    def view_pca(self, X, Y, use_time=True, save_img=False):
         X_ = PCA(n_components=2).fit_transform(X)
-        te.plot3d(X_ ,Y, title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"])
+        te.plot(X_ ,Y, title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"], use_time=use_time)
         if save_img:
             self.plot3d_save_images( X_, Y,title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"])
 
@@ -244,14 +252,14 @@ class TE():
         
 if __name__ == "__main__":
 
-    faults = [1,2,4]
+    faults = [2,4]
     te = TE()
     X_train, Y_train, X_test, Y_test = te.read_concat_multiple_faults("data", faults, False, [])
     
-    te.view_tsne(X_test, Y_test, True)
-    # te.view_pca(X_test, Y_test)
+    te.view_tsne(X_test, Y_test, use_time=True, save_img=True)
+    #te.view_pca(X_test, Y_test, use_time=True)
     # te.view_radviz(X_test, Y_test, [0, 20, 41, 31, 6])
-    # te.view_sammon(X_test, Y_test)
+    #te.view_sammon(X_test, Y_test)
     
     
     
