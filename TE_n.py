@@ -212,13 +212,15 @@ class TE():
         self.plot(X_, Y, title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"], use_time=use_time)
         if save_img:
             self.plot3d_save_images( X_, Y,title="Simultaneous 2-D with time evolution - TSNE",features_name=["tSNE 1","tSNE 2"])
+        return X_,Y.T[0]
 
 
     def view_pca(self, X, Y, use_time=True, save_img=False):
         X_ = PCA(n_components=2).fit_transform(X)
-        te.plot(X_ ,Y, title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"], use_time=use_time)
+        self.plot(X_ ,Y, title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"], use_time=use_time)
         if save_img:
             self.plot3d_save_images( X_, Y,title="Simultaneous 2-D with time evolution - PCA",features_name=["PCA 1","PCA 2"])
+        return X_,Y.T[0]
 
     def view_radviz(self, X, Y, feats):
 
@@ -232,6 +234,7 @@ class TE():
         pd.plotting.radviz(X_, 'Fault')
         plt.title('Radviz')
         plt.show()
+        return X_,Y.T[0]
 
     def view_sammon(self, X, Y):
         
@@ -256,7 +259,7 @@ if __name__ == "__main__":
     te = TE()
     X_train, Y_train, X_test, Y_test = te.read_concat_multiple_faults("data", faults, False, [])
     
-    te.view_tsne(X_test, Y_test, use_time=True, save_img=True)
+    te.view_tsne(X_test, Y_test, use_time=False, save_img=False)
     #te.view_pca(X_test, Y_test, use_time=True)
     # te.view_radviz(X_test, Y_test, [0, 20, 41, 31, 6])
     #te.view_sammon(X_test, Y_test)
